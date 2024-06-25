@@ -1,0 +1,6 @@
+.env
+.vercel
+.venv
+__pycache__
+api_v1/__pycache__
+main.py
