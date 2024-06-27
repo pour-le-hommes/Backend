@@ -23,7 +23,7 @@ def get_sprint_goals(iteration: int):
 @tasks_router.post("/{iteration}/sprint_goals", description="Add sprint goals. Available only on full moons")
 def update_sprint_goals(iteration:int,args:PostRequests):
     available, value = check_moon_requirement()
-    if True:
+    if available:
         try:
             response = add_goals(iteration,args.sprint_name,args.sprint_desc)
             return SuccessPostRequests(data=response, response="A new goal has been set. New challenge awaits!") # type: ignore
@@ -48,7 +48,7 @@ def get_sprint_tasks(iteration: int):
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
     
-@tasks_router.post("/{iteration}/tasks", description="Add sprint goals. Available only on full moons")
+@tasks_router.post("/{iteration}/tasks", description="Add sprint tasks. Always available and will find correlation with sprint goal")
 def add_sprint_tasks(iteration:int,args:PostTasksRequests):
     try:
         response = add_tasks(current_iteration=iteration,name=args.sprint_name,desc=args.sprint_desc, importance=args.importance, difficulty=args.difficulty)

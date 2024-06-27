@@ -3,6 +3,7 @@ import numpy as np
 from api_v1.utils.database import init_db
 from api_v1.utils.cloudflare.main_function_cloudflare import text_embedding
 
+
 def cosine_similarity(vecA, vecB):
     print("transform to np")
     vecA = np.array(eval(vecA))
@@ -34,6 +35,7 @@ sprint_tasks_table = "Tasks in Sprints"
 class TasksGoalsSingleton():
     _instances = None
     _iteration : int
+    _goal : List
     _goal_embeddings : List
     _tasks : List
 
@@ -41,6 +43,7 @@ class TasksGoalsSingleton():
         if cls._instances is None:
             cls._instances = super(TasksGoalsSingleton, cls).__new__(cls)
             cls._instances._iteration = 0
+            cls._instances._goal = []
             cls._instances._goal_embeddings = []
             cls._instances._tasks = []
             
@@ -55,8 +58,8 @@ class TasksGoalsSingleton():
             if sprint_vals!=[]:
                 max_val = max(sprint_vals)
                 self._iteration = max_val
-
-                self._goal_embeddings = [[i["sprint_goal"],i["embeddings"]] for i in all_goals.data if i["iteration"]==max_val] # type: ignore
+                self._goal = [i for i in all_goals.data if i["iteration"]==max_val] # type: ignore
+                self._goal_embeddings = [[i["sprint_goal"],i["embeddings"]] for i in self._goal] # type: ignore
     
     def add_goals(self, sprint_id:int, goal_name:str, goal_desc:str | None):
         goal_added = "Goal Name: "+goal_name+" Goal Description: "

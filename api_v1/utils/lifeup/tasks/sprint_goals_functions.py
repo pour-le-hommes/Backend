@@ -29,6 +29,9 @@ def check_moon_requirement(date=None) -> List[Union[bool, float]]:
 # ? Sprint goals
 
 def retrieve_goals(current_iteration:int) ->List[dict]:
+    if SprintSingleton._goal!=[]:
+        return SprintSingleton._goal
+
     result = supadb.table(sprint_goals_table).select("*").eq("iteration",current_iteration).execute()
 
     return result.data
@@ -54,6 +57,8 @@ def add_goals(current_iteration:int,name:str,desc:str | None):
             "embeddings": goal_embedding,
         }
     ).execute()
+
+    SprintSingleton._goal.append(result.data)
 
     if result:
         return result.data
