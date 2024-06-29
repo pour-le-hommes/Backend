@@ -1,26 +1,14 @@
-import os
-from typing import Final
-from discord import Intents, Client, Message
+from fastapi import APIRouter, BackgroundTasks, status
+from fastapi.responses import JSONResponse
+from api_v1.utils.database import init_db
+from api_v1.utils.discord_function.main_function import disc_main
 
-intents = Intents.default()
-intents.message_content = True
-client: Client = Client(intents=intents)
+discord_router = APIRouter(prefix="/discord",tags=["Discord Bot"])
 
-
-
-
-
-@client.event
-async def on_ready():
-    print("Now running")
-
-
-def disc_main():
-    disc_token: Final[str] = os.getenv("DISCORD_TOKEN")
-    client.run(token=disc_token)
-
-# Somewhere else:
-# client = discord.Client(intents=intents)
-# or
-# from discord.ext import commands
-# bot = commands.Bot(command_prefix='!', intents=intents)
+@discord_router.get("/run_discord", description="Retrieve from the lifeup API or if not available then supabase")
+def getSkills(backgroundtasks: BackgroundTasks):
+    try:
+        backgroundtasks.add_task(disc_main)
+        return "Attempt to run discord"
+    except Exception as e:
+        return JSONResponse(e,status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

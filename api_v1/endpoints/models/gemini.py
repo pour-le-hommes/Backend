@@ -25,14 +25,14 @@ async def basic_prompting(args:TextGeneration):
 async def with_audio_prompting(
     audio_file: Annotated[bytes, File()],
     additional_prompt:str="I don't understand what this is saying, can you help me?",
-    passkey:str=os.getenv("passkey")
+    passkey:str=os.getenv("passkey","None")
     ):
     if passkey== os.getenv("passkey"):
 
         try:
-            model_response = await audio_generation(audio_file=audio_file,prompt=additional_prompt)
+            model_response = await audio_generation(audio_seg=audio_file,prompt=additional_prompt)
             return model_response
         except Exception as e:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     else:
-        return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+        return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
