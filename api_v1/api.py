@@ -11,7 +11,6 @@ from api_v1.endpoints.lifeup.lifeup_main import lifeup_router
 from api_v1.endpoints.models.cloudflare import cf_router
 from api_v1.endpoints.models.gemini import gemini_router
 from api_v1.endpoints.models.groq import groq_router
-from api_v1.endpoints.discord_bot.discord_main import discord_router
 
 def init_routers(app_:FastAPI)-> None:
     try:
@@ -20,7 +19,6 @@ def init_routers(app_:FastAPI)-> None:
         app_.include_router(cf_router)
         app_.include_router(gemini_router)
         app_.include_router(groq_router)
-        app_.include_router(discord_router)
     except Exception as e:
         message = "The initialization of routers isn't working: "+str(e)
         raise HTTPException(status_code=500,detail=message)
