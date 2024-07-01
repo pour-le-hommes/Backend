@@ -1,11 +1,6 @@
-from pydantic import BaseModel, ConfigDict
-from datetime import datetime
-from typing import List, Dict
+from pydantic import BaseModel
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
+from typing import List, Dict
 
 class TextGeneration(BaseModel):
     passkey : str = os.getenv("passkey","None")
@@ -15,7 +10,7 @@ class TextGeneration(BaseModel):
             {"role":"user", "content":"Please explain Python to me"},
         ]
 
-class SuccessfulGeneration(BaseModel):
+class SuccessfulTextGeneration(BaseModel):
     response: str
 
     class Config:

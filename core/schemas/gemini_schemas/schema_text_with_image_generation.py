@@ -1,21 +1,16 @@
-from pydantic import BaseModel, ConfigDict
-from datetime import datetime
-from typing import List, Dict
+from pydantic import BaseModel
 import os
-from dotenv import load_dotenv
+from typing import List, Dict
 
-load_dotenv()
-
-
-class TextGeneration(BaseModel):
+class TextImageGeneration(BaseModel):
     passkey : str = os.getenv("passkey","None")
-    messages : List[Dict[str, str]] = [
+    messages : List[Dict[str, any]] = [ # type: ignore
             {"role":"user", "content":"Can you help me?"},
             {"role":"assistant", "content":"Hello, of course. How can I help you?"},
             {"role":"user", "content":"Please explain Python to me"},
         ]
 
-class SuccessfulGeneration(BaseModel):
+class SuccessfulTextImageGeneration(BaseModel):
     response: str
 
     class Config:

@@ -8,7 +8,7 @@ from groq import Groq
 api_key = os.environ.get("GROQ_API_KEY")
 client = Groq(api_key=api_key)
 
-def text_generation():
+def text_generation(user_prompt:str) -> str:
     chat_completion = client.chat.completions.create(
         #
         # Required parameters
@@ -24,7 +24,7 @@ def text_generation():
             # Set a user message for the assistant to respond to.
             {
                 "role": "user",
-                "content": "Explain the importance of fast language models",
+                "content": user_prompt,
             }
         ],
 
@@ -60,7 +60,7 @@ def text_generation():
 
     # Print the completion returned by the LLM.
     print(chat_completion)
-    return chat_completion.choices[0].message.content
+    return str(chat_completion.choices[0].message.content)
 
 
 
@@ -112,18 +112,13 @@ You are a strict regarding the word and will not call the skills if it's not cal
     response = client.chat.completions.create(
         model="llama3-8b-8192",
         messages=messages,
-        tools=tools,
+        tools=tools, # type: ignore
         tool_choice="auto",
         max_tokens=4096,
         temperature=0.95
     )
 
     response_message = response.choices[0].message
-    print(response.choices)
-    print("\n\n\n\n")
-    print(response.choices[0])
-    print("\n\n\n\n")
-    print(response_message.tool_calls)
     tool_calls = response_message.tool_calls
     # Step 2: check if the model wanted to call a function
     if tool_calls:
