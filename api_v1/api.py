@@ -3,7 +3,6 @@ import logging
 from fastapi.middleware import Middleware, cors
 from fastapi import FastAPI, Depends, HTTPException
 from typing import List
-
 from api_v1.utils.user_logging import setup_logging
 from api_v1.utils.database import init_db
 
@@ -42,6 +41,12 @@ def make_middleware() -> List[Middleware]:
 
 def create_app() -> FastAPI:
     try:
+        testing = os.getenv("Show_Docs")
+        if testing==False:
+            kwargs = {"docs_url":False,"redoc_url":None, "openapi_url":None}
+        else:
+            kwargs = {}
+
         init_db()
         setup_logging()
         app_ = FastAPI(
@@ -53,6 +58,7 @@ def create_app() -> FastAPI:
                 "docExpansion":"none",
                 "syntaxHighlight.theme": "obsidian",
             },
+            **kwargs
         )
         init_routers(app_=app_)
         return app_

@@ -5,15 +5,15 @@ from typing import Dict, List
 class TextGeneration(BaseModel):
     passkey : str = os.getenv("passkey","None")
     user_prompt : List[Dict[str,str]] = [
-                                            {
-                                                "role": "system",
-                                                "content": "you are a helpful assistant."
-                                            },
-                                            {
-                                                "role": "user",
-                                                "content": "What is a python language?",
-                                            }
-                                        ]
+        {
+            "role": "system",
+            "content": "you are a helpful assistant."
+        },
+        {
+            "role": "user",
+            "content": "What is a python language?",
+        }
+    ]
 
 
 class SuccessTextGeneration(BaseModel):
