@@ -1,5 +1,6 @@
 
 import os
+import re
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
 
 from api_v1.utils.groq.text_generation import run_conversation, text_generation
@@ -14,7 +15,7 @@ def basic_prompting(args: TextGeneration):
         try:
                 assert args.passkey == os.getenv("passkey")
                 resp = text_generation(args.user_prompt)
-                return resp
+                return SuccessTextGeneration(response=resp)
         except HTTPException as e:
                 HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Invalid passkey")
 
@@ -24,6 +25,6 @@ def prompting_with_tools(args: FunctionCalling):
         try:
                 assert args.passkey == os.getenv("passkey")
                 resp = run_conversation(args.user_prompt)
-                return resp
+                return SuccessFunctionCalling(response=resp)
         except HTTPException as e:
                 HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Invalid passkey")

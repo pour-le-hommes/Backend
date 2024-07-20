@@ -1,65 +1,27 @@
 
 
 import json
-import requests
+from typing import Dict, List
 import os
 from groq import Groq
 
 api_key = os.environ.get("GROQ_API_KEY")
 client = Groq(api_key=api_key)
 
-def text_generation(user_prompt:str) -> str:
+def text_generation(user_message:List[Dict[str,str]]) -> str:
+    
     chat_completion = client.chat.completions.create(
-        #
-        # Required parameters
-        #
-        messages=[
-            # Set an optional system message. This sets the behavior of the
-            # assistant and can be used to provide specific instructions for
-            # how it should behave throughout the conversation.
-            {
-                "role": "system",
-                "content": "you are a helpful assistant."
-            },
-            # Set a user message for the assistant to respond to.
-            {
-                "role": "user",
-                "content": user_prompt,
-            }
-        ],
-
-        # The language model which will generate the completion.
+        messages=user_message, # type: ignore
         model="llama3-8b-8192",
 
-        #
-        # Optional parameters
-        #
-
-        # Controls randomness: lowering results in less random completions.
-        # As the temperature approaches zero, the model will become deterministic
-        # and repetitive.
         temperature=0.5,
-
-        # The maximum number of tokens to generate. Requests can use up to
-        # 32,768 tokens shared between prompt and completion.
         max_tokens=1024,
-
-        # Controls diversity via nucleus sampling: 0.5 means half of all
-        # likelihood-weighted options are considered.
         top_p=1,
-
-        # A stop sequence is a predefined or user-specified text string that
-        # signals an AI to stop generating content, ensuring its responses
-        # remain focused and concise. Examples include punctuation marks and
-        # markers like "[end]".
         stop=None,
-
-        # If set, partial message deltas will be sent.
         stream=False,
     )
 
     # Print the completion returned by the LLM.
-    print(chat_completion)
     return str(chat_completion.choices[0].message.content)
 
 
@@ -74,7 +36,7 @@ def get_my_skills(passkey):
         getSkills()
         return json.dumps(singletonInstance._localskills)
 
-def run_conversation(user_prompt):
+def run_conversation(user_prompt) -> str:
     # Step 1: send the conversation and available functions to the model
     messages=[
         {
@@ -148,7 +110,9 @@ You are a strict regarding the word and will not call the skills if it's not cal
             model="llama3-8b-8192",
             messages=messages
         )  # get a new response from the model where it can see the function response
-        return second_response.choices[0].message.content
+        return str(second_response.choices[0].message.content)
+    
+    return str(response_message)
 
 
 
