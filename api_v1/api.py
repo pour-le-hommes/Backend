@@ -7,7 +7,6 @@ from api_v1.utils.user_logging import setup_logging
 from api_v1.utils.database import init_db
 
 from api_v1.endpoints.health import health_router
-from api_v1.endpoints.lifeup.lifeup_main import lifeup_router
 from api_v1.endpoints.models.cloudflare import cf_router
 # from api_v1.endpoints.models.gemini import gemini_router
 from api_v1.endpoints.models.groq import groq_router
@@ -15,7 +14,6 @@ from api_v1.endpoints.models.groq import groq_router
 def init_routers(app_:FastAPI)-> None:
     try:
         app_.include_router(health_router)
-        app_.include_router(lifeup_router)
         app_.include_router(cf_router)
         # app_.include_router(gemini_router)
         app_.include_router(groq_router)

@@ -24,17 +24,8 @@ def text_generation(user_message:List[Dict[str,str]]) -> str:
     # Print the completion returned by the LLM.
     return str(chat_completion.choices[0].message.content)
 
-
-
-from api_v1.utils.lifeup.skills.skills_util import MyData
-from api_v1.endpoints.lifeup.skills import getSkills
-singletonInstance = MyData()
-
-# Example dummy function hard coded to return the score of an NBA game
-def get_my_skills(passkey):
-    if passkey=="TERRA":
-        getSkills()
-        return json.dumps(singletonInstance._localskills)
+def discuss_white_book(user_query:str):
+    pass
 
 def run_conversation(user_prompt) -> str:
     # Step 1: send the conversation and available functions to the model
@@ -56,7 +47,7 @@ You are a strict regarding the word and will not call the skills if it's not cal
         {
             "type": "function",
             "function": {
-                "name": "get_my_skills",
+                "name": "discuss_white_book",
                 "description": "Get the skills of the character Oga Takashi with a keyword. Only people who can answer the question can find out the character's skill.",
                 "parameters": {
                     "type": "object",
@@ -87,7 +78,7 @@ You are a strict regarding the word and will not call the skills if it's not cal
         # Step 3: call the function
         # Note: the JSON response may not always be valid; be sure to handle errors
         available_functions = {
-            "get_my_skills": get_my_skills,
+            "discuss_white_book": discuss_white_book,
         }  # only one function in this example, but you can have multiple
         messages.append(response_message)  # extend conversation with assistant's reply
         # Step 4: send the info for each function call and function response to the model
@@ -96,7 +87,7 @@ You are a strict regarding the word and will not call the skills if it's not cal
             function_to_call = available_functions[function_name]
             function_args = json.loads(tool_call.function.arguments)
             function_response = function_to_call(
-                            passkey=function_args.get("passkey")
+                            user_query=function_args.get("passkey")
                         )
             messages.append(
                 {
