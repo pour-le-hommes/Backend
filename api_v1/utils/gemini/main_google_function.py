@@ -3,6 +3,7 @@ from google import genai
 import os
 from dotenv import load_dotenv
 from typing import List, Dict, Union
+from google.genai import types
 
 load_dotenv()
 
@@ -18,6 +19,20 @@ class GoogleGemini():
             self.initialized = True
             api_key = os.getenv("GOOGLE_GENERATIVE_AI_API_KEY")
             self.client = genai.Client(api_key=api_key)
+            
+    def user_history_mapping(self, user_history: List[Dict[str, str]]):
+        user_history_mapped = []
+        
+        for message in user_history:
+            if message['role'] == 'user':
+                user_history_mapped.append(
+                    types.UserContent(parts=[types.Part.from_text(text=message['message'])])
+                )
+            elif message['role'] == 'model':
+                user_history_mapped.append(
+                    types.ModelContent(parts=[types.Part.from_text(text=message['message'])])
+                )
+        return user_history_mapped
             
     async def text_generation(self, message: str) -> str:
         """
