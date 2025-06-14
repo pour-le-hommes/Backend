@@ -1,49 +1,36 @@
-# from io import BytesIO
-# # import google.generativeai as genai
-# import os
-# from dotenv import load_dotenv
-# from typing import List, Dict, Union
+from io import BytesIO
+from google import genai
+import os
+from dotenv import load_dotenv
+from typing import List, Dict, Union
 
-# load_dotenv()
+load_dotenv()
 
-# async def text_generation(message:List[Dict[str,Union[str,str]]]) -> str:
-#     api_key = os.getenv("GENAI_TEST_API_KEY") or  os.getenv("GOOGLE_GENERATIVE_AI_API_KEY")
-#     genai.configure(api_key=api_key)
-#     model = genai.GenerativeModel(model_name='gemini-1.5-flash')
-#     resp = model.generate_content(message)
-#     return str(resp.text)
-
-
-# async def text_generation_with_image(message:List[Dict[str,Union[str,any]]],image_data:bytes) -> str: # type: ignore
-#     api_key = os.getenv("GENAI_TEST_API_KEY") or  os.getenv("GOOGLE_GENERATIVE_AI_API_KEY")
-#     genai.configure(api_key=api_key)
-#     model = genai.GenerativeModel(model_name='gemini-1.5-flash')
-#     image = Image.open(BytesIO(image_data))
+class GoogleGemini():
+    __instance__ = None
+    def __new__(cls, *args, **kwargs):
+        if not cls.__instance__:
+            cls.__instance__ = super(GoogleGemini, cls).__new__(cls)
+        return cls.__instance__
     
-    
-#     message.append({
-#         "role":"user",
-#         "parts":[image]
-#     })
-#     resp = model.generate_content(message)
-#     print("response model",resp)
-#     return str(resp.text)
+    def __init__(self):
+        if not hasattr(self, 'initialized'):
+            self.initialized = True
+            api_key = os.getenv("GOOGLE_GENERATIVE_AI_API_KEY")
+            self.client = genai.Client(api_key=api_key)
+            
+    async def text_generation(self, message: str) -> str:
+        """
+        Generate text using Google Gemini API.
+        
+        Args:
+            message (str): Message to send to the model.
 
-
-# async def audio_generation(prompt:str, audio_seg:bytes):
-#     api_key = os.getenv("GENAI_TEST_API_KEY") or  os.getenv("GOOGLE_GENERATIVE_AI_API_KEY")
-#     genai.configure(api_key=api_key)
-
-#     content = [
-#         "Please transcribe this recording:",
-#         {
-#             "mime_type": "audio/mp3",
-#             "data": audio_seg[:10000].export().read() # type: ignore
-#         }
-#     ]
-
-#     model = genai.GenerativeModel(model_name='gemini-1.5-flash')
-#     resp = model.generate_content(prompt)
-#     # genai.upload_file()
-#     print(resp.text)
-#     return resp.text
+        Returns:
+            str: Generated text response.
+        """
+        response = self.client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=[message]
+        )
+        return str(response.text)
