@@ -1,5 +1,5 @@
-from api_v1.utils.database import init_db
-import datetime as dt
+from api_v1.utils.supabase_db.supabase_main import init_db
+
 
 db_todo = init_db()
 
