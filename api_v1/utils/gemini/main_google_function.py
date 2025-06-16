@@ -35,13 +35,33 @@ class GoogleGemini():
         
         for message in user_history:
             if message['role'] == 'user':
-                user_history_mapped.append(
-                    types.UserContent(parts=[types.Part.from_text(text=message['message'])])
-                )
+                if "Document retrieved from function call:" in message['message'] and " with the response of" in message['message']:
+                    split_message = message['message'].replace("Document retrieved from function call: ","").split(' with the response of')
+                    function_response = types.Part.from_function_response(
+                        name=str(split_message[0]),
+                        response=eval(split_message[-1]),
+                    )
+                    user_history_mapped.append(
+                        types.UserContent(parts=[function_response])
+                    )
+                else:
+                    user_history_mapped.append(
+                        types.UserContent(parts=[types.Part.from_text(text=message['message'])])
+                    )
             elif message['role'] == 'model':
-                user_history_mapped.append(
-                    types.ModelContent(parts=[types.Part.from_text(text=message['message'])])
-                )
+                if "I'm using the function tool:" in message['message'] and " with the data:" in message['message']:
+                    split_message = message['message'].split(' with the data: ')
+                    function_call_part = types.Part.from_function_call(
+                        name=str(split_message[0].replace("I'm using the function tool: ", '')),
+                        args=eval(split_message[-1])
+                    )
+                    user_history_mapped.append(
+                        types.ModelContent(parts=[function_call_part])
+                    )
+                else:
+                    user_history_mapped.append(
+                        types.ModelContent(parts=[types.Part.from_text(text=message['message'])])
+                    )
         return user_history_mapped
     
     def generate_vector_embedding(self, text: str) -> List[types.ContentEmbedding]:
@@ -62,6 +82,8 @@ class GoogleGemini():
             
     def text_generation(self, messages: List[Dict[str, str]]) -> List[Dict[str, str]]:
         user_history = self.user_history_mapping(messages[0:-1])
+        
+        print('\n\nchecking inside user history:', user_history)
 
         chat = self.client.chats.create(
             model="gemini-2.0-flash",
@@ -72,15 +94,17 @@ class GoogleGemini():
                 'temperature':0.8
             }
         )
+        print('\n\nMessage being used as first prompt:',messages[-1]['message'])
         response = chat.send_message(messages[-1]['message'])
         
         if not response.function_calls or len(response.function_calls)!=1:
+            print('\n\nNOT USING FUNCTION CALLING')
             conv_details = [str(message.parts[0].text) for message in chat.get_history()] # type: ignore
             self.conversation_keywords = conv_details
             real_roles = []
             real_messages = []
             for message in chat.get_history():
-                print('\n\n===============================')
+                print('===============================')
                 real_roles.append(message.role)
                 real_message = message.parts[0].text # type: ignore
                 if real_message == None:
@@ -100,7 +124,9 @@ class GoogleGemini():
             return self.real_data
         
         tool_call = response.function_calls[0]
+        print('\n\nUSING FUNCTION CALLING')
         if 'memorize_information'==tool_call.name:
+            print('\n\nUSING memorize_information with arguments: ', tool_call.args)
             validated_args = MemorizeInformation(**tool_call.args) # type: ignore
             vector_embedding = self.generate_vector_embedding(validated_args.info)
             if not vector_embedding:
@@ -109,6 +135,7 @@ class GoogleGemini():
             result = memorize_information(validated_args)
             
         elif 'recall_information'==tool_call.name:
+            print('\n\nUSING recall_information with arguments: ', tool_call.args)
             validated_args = RecallInformation(**tool_call.args) # type: ignore
             vector_embedding = self.generate_vector_embedding(validated_args.info)
             if not vector_embedding:
@@ -136,15 +163,14 @@ class GoogleGemini():
                 if message.role == 'model':
                     function_call_message = f"I'm using the function tool: {message.parts[0].function_call.name} with the data: {message.parts[0].function_call.args}" # type: ignore
                     real_messages.append(function_call_message)
-                    print(message.parts[0].function_call) # type: ignore
                 else:
-                    print("\n\nchecking inside message.parts[0].function_response.response['result']: ", message.parts[0].function_response.response['result']) # type: ignore
-                    function_response_message = f"Document retrieved from function call: {message.parts[0].function_response.response['result']}" # type: ignore
+                    print("\n\nchecking inside message.parts[0].function_response: ", message.parts[0].function_response) # type: ignore
+                    function_response_message = f"Document retrieved from function call:{message.parts[0].function_response.name} {message.parts[0].function_response.response['result']}" # type: ignore
                     real_messages.append(function_response_message)
-                    print(message.parts[0].function_response.response['result']) # type: ignore
             else:
                 real_messages.append(message.parts[0].text) # type: ignore
         real_data = [{'role': r, 'message': m} for r, m in zip(real_roles, real_messages)]
         self.real_data = real_data
-            
+        
+        
         return self.real_data

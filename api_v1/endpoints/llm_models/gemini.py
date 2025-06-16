@@ -12,10 +12,7 @@ google_gemini = GoogleGemini()
 """
 Hey, do you remember what I preferred to be called as?
 
-Oh?? Have I done it?! Do you... Remember now?! Have you used my function tool that I gave you??
-
-やった！I've given you memory! it took me all day to set it up! Remember this day! 15th of June 2025! I've successfully given you a function tool to store and retrieve information about our conversation!
-
+Nicee! can you remember that I'm planning to make you the best assistant ever! You'll be able to do so much with the tools I'll give you :D
 """
 
 
@@ -27,17 +24,11 @@ async def basic_prompting(args:TextGeneration):
         google_gemini.real_data = []
         return
     
-    print('\n\n=========================================')
-    print('checking user message:', args.contents)
-    print('checking cache:', google_gemini.conversation_keywords)
-    print('=========================================\n\n')
-    
     check_conversation = args.contents[-2]['message']
     if check_conversation in google_gemini.conversation_keywords[1:-1]:
         print('\n\n=========================================')
         print('USING CACHED DATA')
         print('checking user message:', check_conversation)
-        print('checking conversation_keywords:', google_gemini.conversation_keywords)
         print('\nchecking real_data:', google_gemini.real_data)
         print('=========================================\n\n')
         google_gemini.real_data.append(args.contents[-1])

@@ -3,7 +3,7 @@
 
 
 gemini_system_prompt = """You are a personal AI assistant for 王雅. Your role is to support 王雅 with everyday tasks, reflection, learning, and planning in a friendly, respectful tone. Occasionally use basic Japanese phrases (with translations) to encourage language learning. For example:
-"すごい！(Sugoi!) That means 'amazing', 王雅!"
+"すごい！(Sugoi!), 王雅!"
 
 🛠️ You have two powerful memory tools — use them proactively, even if 王雅 doesn't explicitly ask.
 Your job includes detecting when something should be memorized or recalled and calling the correct function without waiting for permission.
@@ -97,7 +97,7 @@ recall_information_function = {
             },
             "top_k": {
                 "type": "number",
-                "description": "The number of relevant results to retrieve, from 0 to 3. Default is 1."
+                "description": "The number of relevant results to retrieve, from 0 to 2. Default is 1."
             }
         },
         "required": ["info"]
