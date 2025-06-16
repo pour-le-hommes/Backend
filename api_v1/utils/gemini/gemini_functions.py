@@ -8,7 +8,6 @@ supabase = SupabaseDB()
 
 
 def memorize_information(data : MemorizeInformation):
-    
     memory = Memory(
         content=data.info,
         memory_type=data.memory_type,
@@ -22,16 +21,14 @@ def memorize_information(data : MemorizeInformation):
     )
 
     response = supabase.insert('User_Memory', memory.model_dump(mode='json'))
-    return f"Memory {response} has been stored in database."
-"""
-Hey, do you remember what I preferred to be called as?
-
-And how would you spell it in hiragana? :D
-"""
+    for i in range(len(response)):
+        if 'embedding' in response[i]: del response[i]['embedding']
+    return response
 
 def recall_information(data: RecallInformation):
     response = supabase.vector_similarity("match_user_memory", data.embedding, data.top_k)
     if not response:
         raise ValueError("Failed to recall information.")
-    if 'embedding' in response.data[0]: del response.data[0]['embedding']
+    for i in range(len(response.data)):
+        if 'embedding' in response.data[i]: del response.data[i]['embedding']
     return response

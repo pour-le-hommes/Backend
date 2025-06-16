@@ -13,5 +13,5 @@ class MemorizeInformation(BaseModel):
 
 class RecallInformation(BaseModel):
     info: str = Field(..., description="The semantic content of the memory.")
-    top_k: int = Field(3, description="Amount of probability want to be taken account.")
+    top_k: int = Field(1, description="Amount of probability want to be taken account.")
     embedding: Optional[List[float]] = Field(None, description="Vector representation of the memory content.")

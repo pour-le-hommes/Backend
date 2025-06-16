@@ -27,10 +27,8 @@ class GoogleGemini():
                     types.FunctionDeclaration(**recall_information_function)
                 ]
             )
-            self.current_conversation = {
-                'conversation_keywords': [],
-                'real_data': []
-            }
+            self.conversation_keywords : List[str] = []
+            self.real_data: List[Dict[str, str]] = []
             
     def user_history_mapping(self, user_history: List[Dict[str, str]]) -> List:
         user_history_mapped = []
@@ -62,7 +60,7 @@ class GoogleGemini():
         )
         return response.embeddings if response.embeddings else []
             
-    def text_generation(self, messages: List[Dict[str, str]]) -> str:
+    def text_generation(self, messages: List[Dict[str, str]]) -> List[Dict[str, str]]:
         user_history = self.user_history_mapping(messages[0:-1])
 
         chat = self.client.chats.create(
@@ -71,14 +69,14 @@ class GoogleGemini():
             config={
                 'system_instruction':gemini_system_prompt,
                 'tools': [self.tools],
-                'temperature':0.3,
-                'automatic_function_calling': { 'disable': False}
+                'temperature':0.8
             }
         )
         response = chat.send_message(messages[-1]['message'])
         
         if not response.function_calls or len(response.function_calls)!=1:
-            conv_details = [message.parts[0].text for message in chat.get_history()] # type: ignore
+            conv_details = [str(message.parts[0].text) for message in chat.get_history()] # type: ignore
+            self.conversation_keywords = conv_details
             real_roles = []
             real_messages = []
             for message in chat.get_history():
@@ -98,11 +96,8 @@ class GoogleGemini():
                     real_messages.append(message.parts[0].text) # type: ignore
                     
             real_data = [{'role': r, 'message': m} for r, m in zip(real_roles, real_messages)]
-            self.current_conversation = {
-                'conversation_keywords':conv_details,
-                'real_data':real_data
-            }
-            return str(response.text)
+            self.real_data = real_data
+            return self.real_data
         
         tool_call = response.function_calls[0]
         if 'memorize_information'==tool_call.name:
@@ -119,11 +114,7 @@ class GoogleGemini():
             if not vector_embedding:
                 raise ValueError("Failed to generate vector embedding for the provided information.")
             validated_args.embedding = vector_embedding[0].values
-            result = recall_information(validated_args)  # Assuming 'info' is the string attribute needed
-        
-        
-        # print('checking before function call bot response:', response.text)
-        # user_history.append(types.UserContent(parts=[types.Part.from_text(text=str(response.text))]))
+            result = recall_information(validated_args)
         
         function_response_part = types.Part.from_function_response(
             name=str(tool_call.name),
@@ -132,7 +123,9 @@ class GoogleGemini():
         user_history.append(function_response_part)
         response = chat.send_message(function_response_part)
         
-        conv_details = [message.parts[0].text for message in chat.get_history()] # type: ignore
+        conv_details = [str(message.parts[0].text) for message in chat.get_history()] # type: ignore
+        self.conversation_keywords = conv_details
+        
         real_roles = []
         real_messages = []
         for message in chat.get_history():
@@ -145,16 +138,13 @@ class GoogleGemini():
                     real_messages.append(function_call_message)
                     print(message.parts[0].function_call) # type: ignore
                 else:
-                    function_response_message = f"Document retrieved from function call: {message.parts[0].function_response.response['result'].data[0]}" # type: ignore
+                    print("\n\nchecking inside message.parts[0].function_response.response['result']: ", message.parts[0].function_response.response['result']) # type: ignore
+                    function_response_message = f"Document retrieved from function call: {message.parts[0].function_response.response['result']}" # type: ignore
                     real_messages.append(function_response_message)
-                    print(message.parts[0].function_response.response['result'].data[0]) # type: ignore
+                    print(message.parts[0].function_response.response['result']) # type: ignore
             else:
                 real_messages.append(message.parts[0].text) # type: ignore
-                
         real_data = [{'role': r, 'message': m} for r, m in zip(real_roles, real_messages)]
-        self.current_conversation = {
-            'conversation_keywords':conv_details,
-            'real_data':real_data
-        }
+        self.real_data = real_data
             
-        return str(response.text)
+        return self.real_data
