@@ -1,7 +1,3 @@
-
-
-
-
 gemini_system_prompt = """You are a personal AI assistant for 王雅. Your role is to support 王雅 with everyday tasks, reflection, learning, and planning in a friendly, respectful tone. Occasionally use basic Japanese phrases (with translations) to encourage language learning. For example:
 "すごい！(Sugoi!), 王雅!"
 
@@ -54,52 +50,60 @@ Trigger the correct function when a request matches its purpose.
 """
 
 memorize_information_function = {
-    "name": "memorize_information",
-    "description": "Use this to *store* or *remember* something the user says for future reference, including facts, preferences, goals, or traits. Trigger this when the user wants you to 'remember', 'save', 'store', or 'keep in mind' something.",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "info": {
-                "type": "string",
-                "description": "The content to remember or store (e.g., 'I prefer responses in Japanese')."
-            },
-            "memory_type": {
-                "type": "string",
-                "description": "The type of memory: 'fact', 'preference', 'goal', or 'trait'. Default is 'fact'."
-            },
-            "source": {
-                "type": "string",
-                "description": "The origin of the memory: 'user', 'system', or 'inferred'. Default is 'user'."
-            },
-            "confidence": {
-                "type": "number",
-                "description": "How confident you are in the accuracy or importance of this memory, from 0.0 to 1.0. Default is 1.0."
-            },
-            "tags": {
-                "type": "array",
-                "items": {"type": "string"},
-                "description": "Optional tags to help categorize the memory (e.g., ['language', 'preference'])."
+        "type": "function",
+        "function": {
+            "name": "memorize_information",
+            "description": "Use this to *store* or *remember* something the user says for future reference, including facts, preferences, goals, or traits. Trigger this when the user wants you to 'remember', 'save', 'store', or 'keep in mind' something.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "info": {
+                        "type": "string",
+                        "description": "The content to remember or store (e.g., 'I prefer responses in Japanese')."
+                    },
+                    "memory_type": {
+                        "type": "string",
+                        "description": "The type of memory: 'fact', 'preference', 'goal', or 'trait'. Default is 'fact'."
+                    },
+                    "source": {
+                        "type": "string",
+                        "description": "The origin of the memory: 'user', 'system', or 'inferred'. Default is 'user'."
+                    },
+                    "confidence": {
+                        "type": "number",
+                        "description": "How confident you are in the accuracy or importance of this memory, from 0.0 to 1.0. Default is 10.0."
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Optional tags to help categorize the memory (e.g., ['language', 'preference'])."
+                    }
+                },
+                "required": ["info"]
             }
-        },
-        "required": ["info"]
+        }
     }
-}
 
 recall_information_function = {
-    "name": "recall_information",
-    "description": "Use this to *retrieve* anything previously remembered or stored. Trigger this when the user asks things like: 'What did I say before?', 'Do you remember…?', or 'What's my preference for…?'",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "info": {
-                "type": "string",
-                "description": "The question or phrase that represents what the user wants to recall (e.g., 'What's my favorite tea?')."
-            },
-            "top_k": {
-                "type": "number",
-                "description": "The number of relevant results to retrieve, from 0 to 2. Default is 1."
+        "type": "function",
+        "function": {
+            "name": "recall_information",
+            "description": "Use this to *retrieve* anything previously remembered or stored. Trigger this when the user asks things like: 'What did I say before?', 'Do you remember…?', or 'What's my preference for…?'",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "info": {
+                        "type": "string",
+                        "description": "The question or phrase that represents what the user wants to recall (e.g., 'What's my favorite tea?')."
+                    },
+                    "top_k": {
+                        "type": "number",
+                        "description": "The number of relevant results to retrieve, from 0 to 2. Default is 1."
+                    }
+                },
+                "required": ["info"]
             }
-        },
-        "required": ["info"]
+        }
     }
-}

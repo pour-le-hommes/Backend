@@ -7,13 +7,13 @@ from api_v1.utils.user_logging import setup_logging
 
 from api_v1.endpoints.health import health_router
 from api_v1.endpoints.llm_models.cloudflare import cf_router
-from api_v1.endpoints.llm_models.gemini import gemini_router
+from api_v1.endpoints.llm_models.agnostic import agnostic_router
 
 def init_routers(app_:FastAPI)-> None:
     try:
         app_.include_router(health_router)
         app_.include_router(cf_router)
-        app_.include_router(gemini_router)
+        app_.include_router(agnostic_router)
     except Exception as e:
         message = "The initialization of routers isn't working: "+str(e)
         raise HTTPException(status_code=500,detail=message)
