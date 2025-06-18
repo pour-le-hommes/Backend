@@ -71,7 +71,7 @@ memorize_information_function = {
                     },
                     "confidence": {
                         "type": "number",
-                        "description": "How confident you are in the accuracy or importance of this memory, from 0.0 to 1.0. Default is 10.0."
+                        "description": "How confident you are in the accuracy or importance of this memory, from 0.0 to 1.0. Default is 0.0."
                     },
                     "tags": {
                         "type": "array",
