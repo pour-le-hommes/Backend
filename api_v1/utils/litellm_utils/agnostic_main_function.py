@@ -1,16 +1,20 @@
 import json
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Union
 from dotenv import load_dotenv
 from api_v1.utils.gemini.gemini_configs import memorize_information_function, recall_information_function, gemini_system_prompt
 from api_v1.utils.gemini.gemini_functions import memorize_information, recall_information
 import os
-from litellm import completion, embedding
+from litellm import Usage, completion
+from litellm.types.utils import ModelResponse
+from api_v1.utils.supabase_db.supabase_main import SupabaseDB
 
+supadb = SupabaseDB()
 
 os.getenv("GEMINI_API_KEY")
 os.getenv("GROQ_API_KEY")
 
 load_dotenv()
+
 
 class AgnosticLLM():
     __instance__ = None
@@ -23,6 +27,26 @@ class AgnosticLLM():
         if not hasattr(self, 'initialized'):
             self.initialized = True
             self.gemini_model = "gemini/gemini-2.0-flash"
+            self.groq_model = "groq/llama-3.1-8b-instant"
+            
+    def send_logs(self, response_data):
+    
+        # Access usage from the correct location if available
+        token_size = response_data.usage
+        if token_size is not None:
+            token_size = token_size.total_tokens
+        else:
+            token_size = 0  # or handle as appropriate
+
+        model_name = response_data.model
+        response = response_data.choices[0].message.content
+        data = {
+            "response" : response,
+            "model_name" : model_name,
+            "token_size" : token_size,
+        }
+        
+        supadb.insert("LLM_History", data)
             
     def text_generation(self, messages: List[Dict[str, Any]]) -> List[Dict[str, str]]: # type: ignore
         tools = [recall_information_function, memorize_information_function]
@@ -30,10 +54,12 @@ class AgnosticLLM():
             'role':'system',
             'content':gemini_system_prompt
         }
-        messages.insert(0, system_prompt)
+        
+        if not any([i for i in messages if i['role']=='system']):
+            messages.insert(0, system_prompt)
 
         response = completion(
-        model=self.gemini_model,
+        model=self.groq_model,
         messages=messages,
         tools=tools,
         tool_choice="auto",
@@ -66,7 +92,7 @@ class AgnosticLLM():
             )  # extend conversation with function response
         print('\n\nUSING FUNCTION CALLING')
         second_response = completion(
-        model=self.gemini_model,
+        model=self.groq_model,
         messages=messages,
         ).choices[0].message # type: ignore
         

@@ -7,8 +7,6 @@ from core.models.database_model import Memory
 
 supabase = SupabaseDB()
 
-
-            
 def generate_vector_embedding(text: str):
     response = embedding(
         model="gemini/text-embedding-004",
@@ -16,8 +14,6 @@ def generate_vector_embedding(text: str):
     )
     embedding_data = response['data'][0]['embedding'] # type: ignore
     return embedding_data
-
-
 
 def memorize_information(info:str, memory_type:str='fact', source:str='user', confidence:float=0.0, tags:List[str]=[]):
     embedding_data = generate_vector_embedding(info)
